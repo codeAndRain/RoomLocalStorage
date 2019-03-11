@@ -15,6 +15,13 @@ import java.util.List;
 public class UserAdapter extends RecyclerView.Adapter<UserViewHolder> {
 
     List<User> userList = new ArrayList<>();
+    private RecyclerView recyclerView;
+
+    @Override
+    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+        this.recyclerView = recyclerView;
+    }
 
     @NonNull
     @Override
@@ -46,6 +53,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserViewHolder> {
 
     public void addUser(User user) {
         userList.add(user);
-        notifyItemInserted(userList.size());
+        notifyItemInserted(userList.size() - 1);
+        recyclerView.scrollToPosition(userList.size() - 1);
     }
 }
