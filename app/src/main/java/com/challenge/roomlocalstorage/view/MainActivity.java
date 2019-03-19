@@ -13,8 +13,10 @@ import com.challenge.roomlocalstorage.R;
 import com.challenge.roomlocalstorage.data.entities.User;
 import com.challenge.roomlocalstorage.data.repo.Repository;
 
-import java.util.List;
-import java.util.concurrent.ExecutionException;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -25,6 +27,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private UserAdapter userAdapter;
     private Repository repository;
+
+    private Disposable compositeDisposable = new CompositeDisposable();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,17 +74,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onResume() {
         super.onResume();
-        try {
-            List<User> users = repository.getAllUsers();
-            userAdapter.setUserList(users);
-        } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
-        }
+         compositeDisposable = repository.getAllUsers()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(userList -> userAdapter.setUserList(userList));
+
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         repository.onDestroy();
+        compositeDisposable.dispose();
     }
 }

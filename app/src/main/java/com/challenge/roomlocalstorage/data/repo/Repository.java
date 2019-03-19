@@ -8,7 +8,8 @@ import com.challenge.roomlocalstorage.data.databse.AppDatabase;
 import com.challenge.roomlocalstorage.data.entities.User;
 
 import java.util.List;
-import java.util.concurrent.ExecutionException;
+
+import io.reactivex.Single;
 
 public class Repository {
 
@@ -19,8 +20,8 @@ public class Repository {
         userDao = appDatabase.userDao();
     }
 
-    public List<User> getAllUsers() throws ExecutionException, InterruptedException {
-        return new GetUsersAsyncTask(userDao).execute().get();
+    public Single<List<User>> getAllUsers()  {
+        return userDao.getAllUsers();
     }
 
     public void insertUser(User user) {
@@ -44,19 +45,11 @@ public class Repository {
             userDao.addUser(users[0]);
             return null;
         }
-    }
-
-    private static class GetUsersAsyncTask extends AsyncTask<Void, Void, List<User>> {
-
-        private UserDao userDao;
-
-        public GetUsersAsyncTask(UserDao userDao) {
-            this.userDao = userDao;
-        }
 
         @Override
-        protected List<User> doInBackground(Void... voids) {
-            return userDao.getAllUsers();
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
         }
     }
+
 }

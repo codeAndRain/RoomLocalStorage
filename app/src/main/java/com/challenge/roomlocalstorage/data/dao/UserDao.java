@@ -9,11 +9,13 @@ import com.challenge.roomlocalstorage.data.entities.User;
 
 import java.util.List;
 
+import io.reactivex.Single;
+
 @Dao
 public interface UserDao {
 
     @Query("SELECT * FROM user_table")
-    List<User> getAllUsers();
+    Single<List<User>> getAllUsers();
 
     @Query("SELECT COUNT(*) FROM user_table")
     int getUserCount();
