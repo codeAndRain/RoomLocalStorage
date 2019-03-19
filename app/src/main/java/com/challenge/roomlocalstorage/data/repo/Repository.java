@@ -8,6 +8,7 @@ import com.challenge.roomlocalstorage.data.databse.AppDatabase;
 import com.challenge.roomlocalstorage.data.entities.User;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class Repository {
 
@@ -18,23 +19,23 @@ public class Repository {
         userDao = appDatabase.userDao();
     }
 
-    public List<User> getAllUsers() {
-        return userDao.getAllUsers();
+    public List<User> getAllUsers() throws ExecutionException, InterruptedException {
+        return new GetUsersAsyncTask(userDao).execute().get();
     }
 
     public void insertUser(User user) {
-        new insertUserAsyncTask(userDao).execute(user);
+        new InsertUserAsyncTask(userDao).execute(user);
     }
 
     public void onDestroy() {
         AppDatabase.destroyInstance();
     }
 
-    private static class insertUserAsyncTask extends AsyncTask<User, Void, Void> {
+    private static class InsertUserAsyncTask extends AsyncTask<User, Void, Void> {
 
         private UserDao userDao;
 
-        public insertUserAsyncTask(UserDao userDao) {
+        public InsertUserAsyncTask(UserDao userDao) {
             this.userDao = userDao;
         }
 
@@ -42,6 +43,20 @@ public class Repository {
         protected Void doInBackground(User... users) {
             userDao.addUser(users[0]);
             return null;
+        }
+    }
+
+    private static class GetUsersAsyncTask extends AsyncTask<Void, Void, List<User>> {
+
+        private UserDao userDao;
+
+        public GetUsersAsyncTask(UserDao userDao) {
+            this.userDao = userDao;
+        }
+
+        @Override
+        protected List<User> doInBackground(Void... voids) {
+            return userDao.getAllUsers();
         }
     }
 }

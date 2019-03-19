@@ -14,6 +14,7 @@ import com.challenge.roomlocalstorage.data.entities.User;
 import com.challenge.roomlocalstorage.data.repo.Repository;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -69,14 +70,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onResume() {
         super.onResume();
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                List<User> users = repository.getAllUsers();
-                userAdapter.setUserList(users);
-            }
-        });
-        thread.start();
+        try {
+            List<User> users = repository.getAllUsers();
+            userAdapter.setUserList(users);
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
